@@ -200,6 +200,8 @@ The app is a **MR reference overlay tool** (digital lightbox). All drawing happe
 
 ### v0.1 Out of Scope (Backlog)
 
+- Art progress photo capture & animation → v0.2
+- Share photos/animation to social media → v0.2
 - Cloud image import (Google Drive, Flickr) → v0.2
 - Multi-reference images per session → v0.2
 - Onboarding tutorial → v0.3
@@ -216,6 +218,31 @@ The app is a **MR reference overlay tool** (digital lightbox). All drawing happe
 | **Sprint 1 — Foundation** (Week 1–2) | 2 weeks | Unity project setup, Meta SDK integration, passthrough config, surface detection with MRUK |
 | **Sprint 2 — Image Pinning** (Week 3–4) | 2 weeks | Local file picker, image loading, anchoring to surface, opacity shader, image manipulation (move/scale/rotate/lock/flip) |
 | **Sprint 3 — Persistence & Polish** (Week 5–6) | 2 weeks | Project explorer UI, session save/load with spatial anchors, thumbnail generation, basic QA on Quest 2 & Quest 3S |
+
+---
+
+## v0.2 — Art Progress & Sharing
+
+Build on v0.1 by adding the ability to document physical art progress and share it.
+
+### v0.2 Features
+
+| # | Feature | Description |
+|---|---|---|
+| 1 | **Progress Photo Capture** | Capture snapshots of the physical artwork via passthrough camera (PCA). User triggers capture manually (hand gesture or controller button). Photos saved to session folder with timestamp. Captures the real surface without the reference overlay |
+| 2 | **Photo Gallery** | View captured progress photos within the session in chronological order. Delete individual photos. Full-screen preview |
+| 3 | **Progress Animation** | Auto-generate a time-lapse animation from captured progress photos. Configurable frame duration (0.5s–3s per photo). Export as MP4 video. Preview animation in-app before exporting |
+| 4 | **Share Photos** | Share individual progress photos to social media or other apps via Android share intent (system share sheet). Save to device gallery |
+| 5 | **Share Animation** | Share generated MP4 animation to social media via Android share intent. Save to device storage |
+| 6 | **Cloud Image Import** | Google Drive and Flickr integration for importing reference images (OAuth 2.0) |
+| 7 | **Multi-Reference Images** | Support multiple pinned reference images per session with per-image visibility toggle |
+
+### v0.2 Technical Notes
+- Photo capture uses **Passthrough Camera API (PCA)** to grab frames from headset cameras
+- Reference overlay should be hidden/removed from the captured frame so the photo shows only the physical art
+- Animation generation: stitch PNGs into MP4 using Unity's built-in video encoding or a lightweight encoder
+- Share via Android `Intent.ACTION_SEND` / `Intent.ACTION_SEND_MULTIPLE`
+- Quest 2 photos will be grayscale; Quest 3/3S will be color
 
 ---
 
