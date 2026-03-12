@@ -8,13 +8,13 @@
 **Date:** 2026-03-11
 **Engine:** Unity 6 (URP) with Meta XR All-in-One SDK, MR Utility Kit (MRUK), Interaction SDK, Passthrough Camera API
 
-PinPic is a mixed-reality (MR) application that lets users import reference images, anchor them to physical surfaces, reduce their opacity, and trace/draw/color on the real surface beneath. The app tracks the user's physical drawing in real time — via hand tracking or controller — creating a digital copy of the artwork alongside the physical one.
+PinPic is a mixed-reality (MR) reference overlay application. Users import images, anchor them to physical surfaces with adjustable opacity, and then physically trace or draw on the real surface using real pens, markers, or brushes. The app acts as a digital lightbox — replacing projectors, lightboxes, and printouts with a precise, flexible MR overlay.
 
 ---
 
 ## Problem Statement
 
-Artists, hobbyists, and creators who want to trace or reference images while drawing on physical surfaces currently rely on projectors, lightboxes, or printouts. These methods are expensive, inflexible, or low quality. A mixed-reality approach lets users pin any digital image onto any surface at any size and opacity — then draw on the real surface while the app captures a digital version of their work.
+Artists, hobbyists, and creators who want to trace or reference images while drawing on physical surfaces currently rely on projectors, lightboxes, or printouts. These methods are expensive, inflexible, or low quality. A mixed-reality approach lets users pin any digital image onto any surface at any size and opacity — then draw on the real surface with their own physical tools while viewing the overlay through the headset.
 
 ---
 
@@ -32,8 +32,7 @@ Artists, hobbyists, and creators who want to trace or reference images while dra
 - As an artist, I want to pin a reference image to my canvas so I can trace proportions accurately without a projector.
 - As a hobbyist, I want to adjust the opacity of my reference so I can see my physical surface clearly while still following the guide.
 - As a crafter, I want to resize and position a pattern on my workpiece so I can transfer it precisely.
-- As a user, I want the app to track my drawing digitally so I have a clean digital copy without scanning.
-- As a user, I want to save and resume sessions so I can work on a drawing across multiple sittings.
+- As a user, I want to save and resume my reference setup so I can continue a drawing across multiple sittings.
 - As a user, I want to import reference images from Google Drive so I can access my cloud library without transferring files manually.
 
 ---
@@ -67,55 +66,20 @@ Artists, hobbyists, and creators who want to trace or reference images while dra
 - **Reposition:** Grab and drag to move on the surface plane
 - **Rotate:** Two-hand twist or rotation dial
 - **Opacity control:** Slider from 0% (invisible) to 100% (fully opaque), default 40%
-- **Lock:** Lock image in place to prevent accidental moves while drawing
+- **Lock:** Lock image in place to prevent accidental moves while tracing
 - **Flip/Mirror:** Horizontal and vertical flip
 
-### 4. Physical Drawing Tracking
-
-- Track hand (v2.2+) or controller using Quest hand tracking and controller APIs
-- Detect contact or near-contact with anchored surface via proximity raycast + physics
-- Record stroke path, pressure approximation (speed/distance heuristic), and timestamp
-- Real-time stroke smoothing (Catmull-Rom / Bezier interpolation)
-- Render digital overlay of tracked strokes on the surface in real time
-
-**Drawing Tools:**
-- Brush size slider (1–50 px)
-- Eraser mode (erase digital strokes only)
-- Undo / Redo (last 50 strokes)
-- Color picker with recently-used palette
-
-### 5. Color Detection & Tracking
-
-- Use **Passthrough Camera API (PCA)** to sample color at the fingertip/pen tip region (maps 3D world position to camera pixel via MRUK)
-- Accurate color sampling on Quest 3/3S (color passthrough)
-- Fallback to manual color picker on Quest 2 (grayscale passthrough)
-- Recently-used color palette + manual color override/correction
-- Optional: auto-detect dominant colors from reference image for quick palette generation
-
-### 6. Digital Canvas & Export
-
-- Maintain a 2D digital canvas that mirrors the physical drawing
-- Vector-based stroke storage (paths + pressure data) for scalable output
-- Layers: reference image layer(s) (bottom), tracked drawing layer (top)
-- Export options:
-  - Drawing only (PNG with transparency)
-  - Drawing + reference composite (PNG/JPEG)
-  - SVG (vector export)
-  - Time-lapse video (MP4)
-  - Session replay data (proprietary format for in-app playback)
-- Save to device storage or share to Google Drive
-
-### 7. Session Management
+### 4. Session Management
 
 - Auto-save sessions every 60 seconds
 - Resume previous sessions with spatial anchors (same physical location)
 - Session library with thumbnail previews
 - Delete / duplicate sessions
-- Session metadata: creation date, duration, stroke count, reference images used
+- Session metadata: creation date, last modified, reference image used, display settings
 
-### 8. UX & Onboarding
+### 5. UX & Onboarding
 
-- First-launch tutorial: spatial hand-guided walkthrough covering import, anchor, draw, export
+- First-launch tutorial: spatial hand-guided walkthrough covering import, anchor, adjust, and draw
 - In-app contextual help panels (dismissible)
 - Calibration wizard for surface alignment on first anchor
 - Optional voice commands for key actions (v1.1+)
@@ -128,12 +92,11 @@ Artists, hobbyists, and creators who want to trace or reference images while dra
 - Maintain 72 Hz refresh on Quest 2, 90 Hz on Quest 3/3S
 - Passthrough latency must not exceed platform baseline
 - Image anchoring drift < 2mm over a 30-minute session
-- Stroke tracking latency < 20ms from physical motion to digital render
 - Sustained thermal target < 40C; display battery impact warning at < 20%
 
 ### Compatibility
-- **Quest 2:** Full feature set; color detection fallback to manual picker (grayscale passthrough)
-- **Quest 3 / Quest 3S:** Full feature set with color passthrough for accurate color detection
+- **Quest 2:** Full feature set (grayscale passthrough)
+- **Quest 3 / Quest 3S:** Full feature set (color passthrough)
 ### Privacy & Data
 - OAuth tokens stored in OS secure storage
 - No image data sent to external servers beyond chosen cloud providers
@@ -144,7 +107,6 @@ Artists, hobbyists, and creators who want to trace or reference images while dra
 - Hand tracking and controller input supported for all interactions
 - UI elements minimum 48dp touch targets
 - High-contrast UI mode option
-- Colorblind-friendly palette indicators
 - Voice commands for key actions (optional, v1.1+)
 
 ---
@@ -153,7 +115,7 @@ Artists, hobbyists, and creators who want to trace or reference images while dra
 
 ### Engine & SDK
 - **Engine:** Unity 6 (Universal Render Pipeline)
-- **Meta SDKs:** Meta XR All-in-One SDK, MR Utility Kit (MRUK), Interaction SDK, Passthrough API, Passthrough Camera API (PCA), Spatial Anchors API
+- **Meta SDKs:** Meta XR All-in-One SDK, MR Utility Kit (MRUK), Interaction SDK, Passthrough API, Spatial Anchors API
 - **Language:** C#
 
 ### Key Components
@@ -165,13 +127,6 @@ PinPic/
 │   │   ├── ImageImport/          # Local & cloud import logic
 │   │   ├── SurfaceDetection/     # MRUK + Scene API integration, plane detection
 │   │   ├── ImageAnchoring/       # OVRSpatialAnchor management, image placement
-│   │   ├── DrawingTracker/       # Hand/controller tracking, stroke recording
-│   │   │   ├── StrokeRecorder.cs
-│   │   │   ├── StrokeSmoother.cs       # Catmull-Rom / Bezier smoothing
-│   │   │   └── StrokeDataModel.cs      # Serializable vector paths + pressure
-│   │   ├── ColorSampler/         # Passthrough color sampling
-│   │   │   └── PassthroughColorSampler.cs  # PCA integration
-│   │   ├── DigitalCanvas/        # 2D canvas rendering, layer compositing, export
 │   │   ├── SessionManager/       # Save/load, auto-save, session library
 │   │   ├── CloudIntegration/     # Google Drive & Flickr OAuth + API
 │   │   ├── MRUKIntegration/      # Scene understanding utilities
@@ -182,21 +137,6 @@ PinPic/
 │   └── Resources/
 ├── Packages/
 └── ProjectSettings/
-```
-
-### Stroke Data Model
-
-```csharp
-[Serializable]
-public class StrokeData
-{
-    public List<Vector3> Points;       // World-space positions
-    public List<float> Pressures;      // 0.0 - 1.0 per point
-    public List<float> Timestamps;     // Seconds since session start
-    public Color StrokeColor;
-    public float BrushSize;            // 1 - 50 px
-    public InputSource Source;         // Hand, Controller
-}
 ```
 
 ### Cloud Integration
@@ -231,12 +171,51 @@ public class StrokeData
 | Phase | Scope | Target |
 |---|---|---|
 | **Phase 1 — Prototype** | MRUK surface detection, local image import, opacity control, OVRSpatialAnchor anchoring | Week 1–4 |
-| **Phase 2 — Drawing Tracking** | Hand/controller tracking, stroke recording + smoothing, digital canvas rendering | Week 5–8 |
-| **Phase 3 — Color & Polish** | PCA color detection, export (PNG/SVG/MP4), session management | Week 9–12 |
-| **Phase 4 — Cloud & UX** | Google Drive & Flickr integration, onboarding tutorial, UI polish | Week 13–16 |
-| **Phase 5 — Store Prep** | Performance optimization, VRC compliance, store assets, beta testing | Week 17–20 |
+| **Phase 2 — Persistence & Polish** | Session save/load, project explorer, image manipulation polish | Week 5–6 |
+| **Phase 3 — Cloud & UX** | Google Drive & Flickr integration, onboarding tutorial, UI polish | Week 7–10 |
+| **Phase 4 — Store Prep** | Performance optimization, VRC compliance, store assets, beta testing | Week 11–14 |
 
 Official Meta samples (Spatial Anchors, Passthrough, MRUK) accelerate Phase 1–2 significantly.
+
+---
+
+## MVP v0.1 — Minimum Viable Product
+
+The MVP focuses on the core loop: **import a local image → anchor it to a physical surface → adjust opacity → physically draw/trace on the real surface → save and resume the reference setup**.
+
+The app is a **MR reference overlay tool** (digital lightbox). All drawing happens physically — no digital stroke tracking, no brush tools, no digital canvas. The user draws with real pens, markers, or brushes on the real surface while viewing the semi-transparent reference image through the headset.
+
+### v0.1 Features
+
+| # | Feature | Description |
+|---|---|---|
+| 1 | **Unity Project Setup** | Unity 6 (URP) project with Meta XR All-in-One SDK, MRUK, Interaction SDK, Passthrough API configured for Quest 2 & Quest 3S |
+| 2 | **Passthrough Setup** | Enable and configure MR passthrough so user sees real environment with digital image overlays |
+| 3 | **Local Image Import** | Browse and select images from Quest device storage (Downloads, Pictures). Support JPEG, PNG. Display in a file picker UI panel |
+| 4 | **Surface Detection** | Use MRUK + Scene API to detect flat surfaces. Highlight detected planes for user selection |
+| 5 | **Image Anchoring** | Pin selected image to chosen surface via OVRSpatialAnchor. 6DoF stability as user moves head |
+| 6 | **Opacity Control** | Slider UI to adjust anchored image opacity (0–100%, default 40%) so user can see through to the physical surface for tracing |
+| 7 | **Image Manipulation** | Grab-to-reposition, pinch-to-scale, rotation, lock in place, horizontal/vertical flip |
+| 8 | **Project Explorer** | Save/load sessions: persist anchoring data (anchor pose, image reference, opacity, scale/rotation/flip/lock state) and project metadata. Session list UI with thumbnails. Delete/duplicate projects |
+
+### v0.1 Out of Scope (Backlog)
+
+- Cloud image import (Google Drive, Flickr) → v0.2
+- Multi-reference images per session → v0.2
+- Onboarding tutorial → v0.3
+- Analytics & telemetry → v1.0
+- Localization → v1.1
+- Voice commands → v1.1
+- Logitech MX Ink stylus support → v1.1
+- Store submission → v1.0
+
+### v0.1 Sprint Plan
+
+| Sprint | Duration | Scope |
+|---|---|---|
+| **Sprint 1 — Foundation** (Week 1–2) | 2 weeks | Unity project setup, Meta SDK integration, passthrough config, surface detection with MRUK |
+| **Sprint 2 — Image Pinning** (Week 3–4) | 2 weeks | Local file picker, image loading, anchoring to surface, opacity shader, image manipulation (move/scale/rotate/lock/flip) |
+| **Sprint 3 — Persistence & Polish** (Week 5–6) | 2 weeks | Project explorer UI, session save/load with spatial anchors, thumbnail generation, basic QA on Quest 2 & Quest 3S |
 
 ---
 
@@ -244,9 +223,8 @@ Official Meta samples (Spatial Anchors, Passthrough, MRUK) accelerate Phase 1–
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Quest 2 grayscale passthrough limits color detection | Degraded color accuracy on Quest 2 | Fallback to manual color picker; market primarily to Quest 3/3S users |
-| Spatial anchor drift over long sessions | Drawing misalignment | Periodic re-anchoring prompts; manual nudge adjustment UI |
-| Hand tracking occlusion near surface | Lost strokes | Support controller as reliable alternative; surface proximity threshold tuning |
+| Quest 2 grayscale passthrough limits reference clarity | Lower contrast reference on Quest 2 | Optimize shader for grayscale; market primarily to Quest 3/3S users |
+| Spatial anchor drift over long sessions | Reference image misalignment | Periodic re-anchoring prompts; manual nudge adjustment UI |
 | Meta store rejection | Launch delay | Follow VRC guidelines from day 1; submit early for concept review |
 | OAuth token management on headset | Security, UX friction | Use system browser for OAuth flows; secure token storage |
 | Thermal throttling during long sessions | Frame drops, degraded tracking | Monitor thermal state; warn user; reduce passthrough processing if needed |
@@ -264,24 +242,21 @@ Official Meta samples (Spatial Anchors, Passthrough, MRUK) accelerate Phase 1–
 ## Testing Plan
 
 ### Unit Tests (NUnit in Unity)
-- Stroke recording and smoothing logic
-- Color sampling accuracy (mock PCA)
 - Anchor save/load persistence
 - Session serialization/deserialization
-- Stroke data model validation
+- Image loading and downsampling logic
 
 ### Integration / Playmode Tests
 - XR Interaction Simulator (hand/controller input simulation)
-- Full flow: import -> anchor -> draw -> export
-- Multi-reference image management
+- Full flow: import -> anchor -> adjust opacity -> save -> reload session
 - Cloud OAuth flow (mocked endpoints)
 
 ### Device Testing (Quest 2 & Quest 3S)
-- Accuracy: >= 90% stroke fidelity (internal grid test)
-- Performance: 72/90 Hz sustained, < 20ms stroke latency
+- Performance: 72/90 Hz sustained with anchored image overlay
 - Thermal profiling: < 40C sustained over 30-minute session
 - Battery impact measurement
-- Edge cases: hand occlusion near surface, anchor drift, low-light environments, multi-reference scenes
+- Anchor drift measurement over 30-minute sessions
+- Edge cases: anchor drift, low-light environments, large images
 - Usability: 10+ beta users (internal + Meta Horizon beta program)
 
 ### VRC Compliance
@@ -373,7 +348,7 @@ jobs:
 
 - Unity Analytics for usage tracking:
   - Session duration, completion rate
-  - Feature usage (import source, hand vs. controller, export format)
+  - Feature usage (import source, manipulation actions, opacity preferences)
   - Drop-off points in onboarding
   - Crash reporting
 - Meta's optional crash reporting integration
@@ -392,15 +367,15 @@ jobs:
 
 ## Post-Launch Roadmap
 
-- **v1.1:** Logitech MX Ink stylus support (pressure-sensitive drawing, haptics, OpenXR Interaction Profile), additional cloud sources (Dropbox, OneDrive), localization expansion, voice commands
-- **v2.0:** Curved/irregular surface support, collaborative drawing, AR phone companion app
+- **v1.1:** Logitech MX Ink stylus support, additional cloud sources (Dropbox, OneDrive), localization expansion, voice commands
+- **v2.0:** Curved/irregular surface support, multi-reference images, AR phone companion app
 
 ---
 
 ## Success Metrics
 
-- **Tracking accuracy:** >= 90% stroke path fidelity vs. physical drawing (measured in internal testing)
-- **Onboarding completion:** >= 85% of users complete first drawing in < 10 minutes
+- **Anchor stability:** < 2mm drift over 30-minute session
+- **Onboarding completion:** >= 85% of users pin their first image in < 5 minutes
 - **Session stability:** < 1% crash rate per session
 - **Store rating:** >= 4.0 stars within first 90 days
 - **Downloads:** 1,000+ in first 90 days post-launch
@@ -410,6 +385,5 @@ jobs:
 ## Key Resources & References
 
 - Meta Spatial Anchors & MRUK docs/samples
-- Passthrough Multiple-Feature Sample (brushes, color styles)
-- Unity-PassthroughCameraApiSamples (color sampling)
+- Passthrough API samples
 - Meta Quest developer documentation & VRC guidelines
